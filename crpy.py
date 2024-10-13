@@ -9,7 +9,9 @@ usage: python crpy.py
 
 import requests
 import time
-import curses
+from rich.console import Console
+from rich.table import Table
+from rich.live import Live
 
 # Dictionary to map currency symbols to icons
 currency_icons = {
@@ -35,12 +37,17 @@ def get_crypto_data():
     data = response.json()
     return data['data']
 
-# Function to display cryptocurrency data
-def display_crypto_data(stdscr, data, previous_prices, update_interval):
-    stdscr.clear()
-    stdscr.addstr(0, 0, "Cryptocurrency Prices")
-    stdscr.addstr(1, 0, f"Next update in: {update_interval} seconds")
-    row = 3
+# Function to create a table with cryptocurrency data
+def create_table(data, previous_prices):
+    table = Table(title="Cryptocurrency Prices")
+    table.add_column("Icon", justify="center")
+    table.add_column("Symbol", justify="center")
+    table.add_column("Price (USD)", justify="right")
+    table.add_column("Market Cap (USD)", justify="right")
+    table.add_column("24h Volume (USD)", justify="right")
+    table.add_column("24h Change (%)", justify="right")
+    table.add_column("Change", justify="center")
+
     for currency in data:
         symbol = currency['symbol']
         price = currency['quote']['USD']['price']
@@ -54,23 +61,31 @@ def display_crypto_data(stdscr, data, previous_prices, update_interval):
                 change = '↑'
             elif price < previous_prices[symbol]:
                 change = '↓'
-        stdscr.addstr(row, 0, f"{icon} {symbol}: ${price:.2f} {change}")
-        stdscr.addstr(row + 1, 0, f"    Market Cap: ${market_cap:.2f}")
-        stdscr.addstr(row + 2, 0, f"    24h Volume: ${volume_24h:.2f}")
-        stdscr.addstr(row + 3, 0, f"    24h Change: {percent_change_24h:.2f}%")
+        table.add_row(
+            icon,
+            symbol,
+            f"${price:.2f}",
+            f"${market_cap:.2f}",
+            f"${volume_24h:.2f}",
+            f"{percent_change_24h:.2f}%",
+            change
+        )
         previous_prices[symbol] = price
-        row += 5
-    stdscr.refresh()
 
-def main(stdscr):
-    curses.curs_set(0)
+    return table
+
+def main():
+    console = Console()
     previous_prices = {}
     update_interval = 30
-    while True:
-        data = get_crypto_data()
-        for i in range(update_interval, 0, -1):
-            display_crypto_data(stdscr, data, previous_prices, i)
-            time.sleep(1)
+
+    with Live(console=console, refresh_per_second=1) as live:
+        while True:
+            data = get_crypto_data()
+            for i in range(update_interval, 0, -1):
+                table = create_table(data, previous_prices)
+                live.update(table)
+                time.sleep(1)
 
 if __name__ == "__main__":
-    curses.wrapper(main)
+    main()
