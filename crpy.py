@@ -13,7 +13,7 @@ import os
 
 # Dictionary to map currency symbols to icons
 currency_icons = {
- 'BTC': '₿',
+    'BTC': '₿',
     'ETH': 'Ξ',
     'XRP': '✕',
     'LTC': 'Ł',
@@ -24,44 +24,9 @@ currency_icons = {
     'TRX': 'T',
     'XMR': 'ɱ',
     'DOGE': 'Ð',
-    'DOT': '●',
-    'UNI': '🦄',
-    'LINK': '🔗',
     'SOL': '☀',
-    'AVAX': '❄',
     'MATIC': '⬢',
-    'ATOM': '⚛',
-    'VET': 'V',
-    'FIL': '⛓',
-    'ICP': '🌀',
-    'AAVE': '👻',
-    'ALGO': '⎇',
-    'XTZ': 'ꜩ',
-    'THETA': 'Θ',
-    'FTM': '👻',
-    'HBAR': 'ℏ',
-    'NEO': '◎',
-    'KSM': '🪶',
-    'EGLD': '🛡',
-    'CAKE': '🍰',
     'SHIB': '🐕',
-    'SUSHI': '🍣',
-    'MANA': '🗺',
-    'AXS': '🪓',
-    'ENJ': '🎮',
-    'CHZ': '🌶',
-    'ZIL': '⚡',
-    'GRT': '🧠',
-    '1INCH': '📏',
-    'BAT': '🦇',
-    'REN': '🌀',
-    'YFI': '🌾',
-    'LUNA': '🌕',
-    'FTT': '🦈',
-    'CEL': '🔥',
-    'RSR': '💱',
-    'COMP': '🏦',
-    'KNC': '🗡',
 }
 
 # Function to get cryptocurrency data from CoinMarketCap API
@@ -81,6 +46,9 @@ def display_crypto_data(data, previous_prices):
     for currency in data:
         symbol = currency['symbol']
         price = currency['quote']['USD']['price']
+        market_cap = currency['quote']['USD']['market_cap']
+        volume_24h = currency['quote']['USD']['volume_24h']
+        percent_change_24h = currency['quote']['USD']['percent_change_24h']
         icon = currency_icons.get(symbol, '')
         change = ''
         if symbol in previous_prices:
@@ -89,6 +57,9 @@ def display_crypto_data(data, previous_prices):
             elif price < previous_prices[symbol]:
                 change = '↓'
         print(f"{icon} {symbol}: ${price:.2f} {change}")
+        print(f"    Market Cap: ${market_cap:.2f}")
+        print(f"    24h Volume: ${volume_24h:.2f}")
+        print(f"    24h Change: {percent_change_24h:.2f}%")
         previous_prices[symbol] = price
 
 def main():
