@@ -5,11 +5,10 @@ Description: This script fetches and displays the latest cryptocurrency data fro
              It refreshes the data every 30 seconds and displays it in a clean, tabular format with icons for each currency.
                 You need to sign up for a free CoinMarketCap API key to use this script.
 usage: python crpy.py
-
 """
 
 import requests
-import json
+import matplotlib.pyplot as plt
 import time
 import os
 
@@ -58,23 +57,28 @@ def display_crypto_data(data):
     print("="*95)
     if 'data' in data:
         for crypto in data['data']:
-            name = crypto['name']
-            symbol = crypto['symbol']
-            icon = currency_icons.get(symbol, '?')  # Get the icon or default to '?'
-            price = f"${crypto['quote']['USD']['price']:.2f}"
-            market_cap = f"${crypto['quote']['USD']['market_cap']:.2f}"
-            volume_24h = f"${crypto['quote']['USD']['volume_24h']:.2f}"
-            print(f"{icon:<5} {name:<20} {symbol:<10} {price:<15} {market_cap:<20} {volume_24h:<20}")
-    else:
-        print("Error: 'data' key not found in the response")
+            print(f"{crypto['cmc_rank']:<5} {crypto['name']:<20} {crypto['symbol']:<10} {crypto['quote']['USD']['price']:<15.2f} {crypto['quote']['USD']['market_cap']:<20.2f} {crypto['quote']['USD']['volume_24h']:<20.2f}")
 
-# Main loop to refresh data every 30 seconds
+# Function to update the chart
+def update_chart(prices, names):
+    plt.clf()
+    plt.bar(names, prices)
+    plt.xlabel('Cryptocurrency')
+    plt.ylabel('Price (USD)')
+    plt.title('Cryptocurrency Prices')
+    plt.pause(0.1)
+
+# Main function to periodically update data and chart
 def main():
+    plt.ion()
     while True:
         data = get_crypto_data()
         if data:
             display_crypto_data(data)
-        time.sleep(30)
+            prices = [crypto['quote']['USD']['price'] for crypto in data['data']]
+            names = [crypto['name'] for crypto in data['data']]
+            update_chart(prices, names)
+        time.sleep(10)
 
 if __name__ == "__main__":
     main()
