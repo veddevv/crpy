@@ -1,5 +1,5 @@
 # This project is archived.
-Why?: I dont want to work on several complex projects, basically.
+Why? I dont want to work on several complex projects, basically. crpy just feels meh to maintain.
 
 
 # crpy
